@@ -2,16 +2,20 @@
 
 // Tipo aquelas bonecas russas, onde uma se encaixa na outra, sem modificar sua aparência original.
 
+import { LogErrorRepository } from "../../usecases/repository/logErrorRepository";
 import { Controller } from "../interfaces/controller";
 import { HttpRequest, HttpResponse } from "../interfaces/http";
 
-export class LogErroControllerDecorator implements Controller {
-  constructor(private readonly controller: Controller) {}
+export class LogErrorControllerDecorator implements Controller {
+  constructor(
+    private readonly controller: Controller,
+    private readonly logErrorRepository: LogErrorRepository,
+  ) {}
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     const httpResponse = await this.controller.handle(httpRequest);
 
     if (httpResponse.statusCode === 500) {
-      console.log("Log do erro");
+      await this.logErrorRepository.log(httpResponse.body.stack);
     }
 
     return httpResponse;
